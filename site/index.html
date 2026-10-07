@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CKA – Bougies Artisanales</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script></head>
+<body>
+  <div id="cursor"></div>
+  <div id="cart-overlay" class="cart-overlay"></div>
+  <aside id="cart-sidebar" class="cart-sidebar">
+    <div class="cart-header">
+      <h3>Mon panier</h3>
+      <button id="cart-close" aria-label="Fermer">&#x2715;</button>
+    </div>
+    <ul id="cart-items" class="cart-items"></ul>
+    <div class="cart-footer">
+      <div class="cart-total">
+        <span>Sous-total</span>
+        <span id="cart-subtotal-price">0,00 €</span>
+      </div>
+      <div class="cart-shipping-line" id="shipping-line">
+        <span id="shipping-label">Livraison</span>
+        <span id="shipping-price">—</span>
+      </div>
+      <div class="cart-total cart-grand-total">
+        <span>Total</span>
+        <span id="cart-total-price">0,00 €</span>
+      </div>
+      <div id="shipping-info-bar" class="shipping-info-bar"></div>
+
+      <!-- FORMULAIRE LIVRAISON -->
+      <div id="delivery-form" class="delivery-form">
+        <p class="form-title">Adresse de livraison</p>
+        <input type="text"   id="f-nom"      class="form-input" placeholder="Nom complet *" />
+        <input type="email"  id="f-email"    class="form-input" placeholder="Email *" />
+        <input type="tel"    id="f-tel"      class="form-input" placeholder="Téléphone *" />
+        <input type="text"   id="f-adresse"  class="form-input" placeholder="Adresse *" />
+        <div class="form-row">
+          <input type="text" id="f-cp"       class="form-input" placeholder="Code postal *" />
+          <input type="text" id="f-ville"    class="form-input" placeholder="Ville *" />
+        </div>
+        <input type="text"   id="f-pays"     class="form-input" placeholder="Pays (France par défaut)" />
+      </div>
+
+      <!-- Bouton PayPal (carte bancaire + PayPal) -->
+      <div id="paypal-button-container"></div>
+      <p class="cart-shipping">Paiement 100% sécurisé</p>
+    </div>
+  </aside>
+
+  <!-- NAV -->
+  <nav id="main-nav">
+    <a href="#" class="logo-link">
+      <svg width="90" height="50" viewBox="0 0 680 380" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="340" cy="190" r="148" fill="none" stroke="#B8965A" stroke-width="0.6" opacity="0.5"/>
+        <circle cx="340" cy="190" r="130" fill="none" stroke="#B8965A" stroke-width="0.3" opacity="0.3"/>
+        <line x1="95" y1="190" x2="170" y2="190" stroke="#B8965A" stroke-width="0.6" opacity="0.6"/>
+        <rect x="166" y="186" width="8" height="8" fill="none" stroke="#B8965A" stroke-width="0.6" opacity="0.7" transform="rotate(45 170 190)"/>
+        <line x1="510" y1="190" x2="585" y2="190" stroke="#B8965A" stroke-width="0.6" opacity="0.6"/>
+        <rect x="506" y="186" width="8" height="8" fill="none" stroke="#B8965A" stroke-width="0.6" opacity="0.7" transform="rotate(45 510 190)"/>
+        <path d="M340 82 C340 82 332 94 332 103 C332 112 335.5 118 340 118 C344.5 118 348 112 348 103 C348 94 340 82 340 82Z" fill="none" stroke="#B8965A" stroke-width="0.8" opacity="0.7"/>
+        <path d="M340 92 C340 92 336 100 336 105 C336 110 338 114 340 114 C342 114 344 110 344 105 C344 100 340 92 340 92Z" fill="#B8965A" opacity="0.25"/>
+        <line x1="322" y1="126" x2="330" y2="126" stroke="#B8965A" stroke-width="0.6" opacity="0.5"/>
+        <line x1="336" y1="126" x2="344" y2="126" stroke="#B8965A" stroke-width="0.6" opacity="0.5"/>
+        <line x1="350" y1="126" x2="358" y2="126" stroke="#B8965A" stroke-width="0.6" opacity="0.5"/>
+        <text x="340" y="208" text-anchor="middle" dominant-baseline="middle" font-family="'Cormorant Garamond', Georgia, serif" font-size="90" font-weight="300" letter-spacing="18" fill="#B8965A" dx="-3">CKA</text>
+        <line x1="258" y1="242" x2="422" y2="242" stroke="#B8965A" stroke-width="0.5" opacity="0.6"/>
+        <line x1="322" y1="252" x2="330" y2="252" stroke="#B8965A" stroke-width="0.6" opacity="0.5"/>
+        <line x1="336" y1="252" x2="344" y2="252" stroke="#B8965A" stroke-width="0.6" opacity="0.5"/>
+        <line x1="350" y1="252" x2="358" y2="252" stroke="#B8965A" stroke-width="0.6" opacity="0.5"/>
+      </svg>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#collections">Collections</a></li>
+      <li><a href="#nouveautes">Nouveautés</a></li>
+      <li><a href="#pourquoi">Notre histoire</a></li>
+      <li><a href="#newsletter">Offres</a></li>
+    </ul>
+    <div class="nav-icons">
+      <!-- Search -->
+      <button aria-label="Rechercher" class="icon-btn" id="search-btn">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </button>
+      <!-- Wishlist -->
+      <button aria-label="Favoris" class="icon-btn" id="wishlist-btn">
+        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </button>
+      <!-- Cart -->
+      <button aria-label="Panier" class="icon-btn" id="cart-btn">
+        <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span id="cart-count" class="cart-count hidden">0</span>
+      </button>
+      <!-- Mobile menu -->
+      <button aria-label="Menu" class="icon-btn" id="menu-btn">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- MOBILE MENU -->
+  <div id="mobile-menu" class="mobile-menu">
+    <button id="mobile-close" class="mobile-close">&#x2715;</button>
+    <nav class="mobile-nav">
+      <a href="#collections">Collections</a>
+      <a href="#nouveautes">Nouveautés</a>
+      <a href="#pourquoi">Notre histoire</a>
+      <a href="#newsletter">Offres</a>
+    </nav>
+  </div>
+
+  <!-- SEARCH BAR -->
+  <div id="search-bar" class="search-bar hidden">
+    <input type="text" id="search-input" placeholder="Rechercher une bougie…" />
+    <button id="search-close-btn">&#x2715;</button>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-left" data-animate>
+      <span class="eyebrow">Artisanat français · Cire végétale</span>
+      <h1 class="hero-title">L'art de<br><em>la lumière</em><br>chez soi</h1>
+      <p class="hero-sub">Des bougies fabriquées à la main, en petite série, avec des matières naturelles et des parfums d'exception. Chaque bougie est une expérience sensorielle unique.</p>
+      <div class="hero-actions">
+        <a href="#nouveautes" class="btn-primary">Découvrir la collection</a>
+        <a href="#pourquoi" class="btn-ghost">Notre savoir-faire</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-sep"></div>
+        <div class="stat"><strong>100%</strong><span>naturel</span></div>
+        <div class="stat-sep"></div>
+        <div class="stat"><strong>60h</strong><span>combustion max</span></div>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-circle c1"></div>
+      <div class="hero-circle c2"></div>
+      <div class="hero-circle c3"></div>
+      <div class="candle-scene">
+        <div class="flame-wrap">
+          <div class="flame f1"></div>
+          <div class="flame f2"></div>
+        </div>
+        <div class="wick"></div>
+        <div class="candle-top"></div>
+        <div class="candle-body"><span class="candle-label">CKA</span></div>
+        <div class="candle-shadow"></div>
+      </div>
+      <span class="hero-quote">"Lumière naturelle"</span>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-bar" aria-hidden="true">
+    <div class="marquee-track">
+      <span class="mi">Cire de soja bio</span><span class="sep">✦</span>
+      <span class="mi">Parfums naturels</span><span class="sep">✦</span>
+      <span class="mi">Fabrication artisanale</span><span class="sep">✦</span>
+      <span class="mi">Livraison offerte dès 50 €</span><span class="sep">✦</span>
+      <span class="mi">Emballage éco-responsable</span><span class="sep">✦</span>
+      <span class="mi">Cire de soja bio</span><span class="sep">✦</span>
+      <span class="mi">Parfums naturels</span><span class="sep">✦</span>
+      <span class="mi">Fabrication artisanale</span><span class="sep">✦</span>
+      <span class="mi">Livraison offerte dès 50 €</span><span class="sep">✦</span>
+      <span class="mi">Emballage éco-responsable</span><span class="sep">✦</span>
+    </div>
+  </div>
+
+  <!-- PRODUCTS -->
+  <section class="section" id="nouveautes">
+    <div class="section-header">
+      <div>
+        <span class="section-label">Sélection du moment</span>
+        <h2 class="section-title">Nos bestsellers</h2>
+      </div>
+      <div class="filter-bar">
+        <button class="filter-btn active" data-filter="all">Tous</button>
+        <button class="filter-btn" data-filter="bois">Boisé</button>
+        <button class="filter-btn" data-filter="floral">Floral</button>
+        <button class="filter-btn" data-filter="frais">Frais</button>
+      </div>
+    </div>
+
+    <div class="products-grid" id="products-grid">
+
+      <article class="product-card" data-cat="bois" data-name="Ambre & Bois de Oud" data-price="34" data-stock="5" data-animate>
+        <div class="product-img" style="background:linear-gradient(145deg,#3D2E22,#2A1F16)">
+          <span class="badge badge-best">Bestseller</span>
+          <div class="product-candle">
+            <div class="pc-flame"></div>
+            <div class="pc-top" style="background:#C4A07E;width:48px"></div>
+            <div class="pc-body" style="background:linear-gradient(135deg,#C4A07E,#A07850);width:48px;height:125px"></div>
+          </div>
+          <div class="product-overlay">
+            <button class="btn-overlay" data-name="Ambre & Bois de Oud" data-price="34">Ajouter au panier</button>
+          </div>
+        </div>
+        <div class="product-info">
+          <p class="product-name">Ambre & Bois de Oud</p>
+          <p class="product-sub">Notes boisées · 45h · 200g</p>
+          <div class="product-footer">
+            <p class="product-price">34,00 €</p>
+            <button class="wishlist-icon" aria-label="Ajouter aux favoris" data-name="Ambre & Bois de Oud">♡</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="product-card" data-cat="floral" data-name="Jasmin de Grasse" data-price="42" data-stock="8" data-animate>
+        <div class="product-img" style="background:linear-gradient(145deg,#2D2A26,#1F1C19)">
+          <span class="badge badge-new">Nouveau</span>
+          <div class="product-candle">
+            <div class="pc-flame" style="animation-delay:.4s"></div>
+            <div class="pc-top" style="background:#E8DDD0;width:58px"></div>
+            <div class="pc-body" style="background:linear-gradient(135deg,#E8DDD0,#D4C8B8);width:58px;height:150px"></div>
+          </div>
+          <div class="product-overlay">
+            <button class="btn-overlay" data-name="Jasmin de Grasse" data-price="42">Ajouter au panier</button>
+          </div>
+        </div>
+        <div class="product-info">
+          <p class="product-name">Jasmin de Grasse</p>
+          <p class="product-sub">Floral délicat · 60h · 300g</p>
+          <div class="product-footer">
+            <p class="product-price">42,00 € <s>48,00 €</s></p>
+            <button class="wishlist-icon" aria-label="Ajouter aux favoris" data-name="Jasmin de Grasse">♡</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="product-card" data-cat="bois" data-name="Forêt Boréale" data-price="28" data-stock="3" data-animate>
+        <div class="product-img" style="background:linear-gradient(145deg,#1C2820,#141E18)">
+          <div class="product-candle">
+            <div class="pc-flame" style="animation-delay:.8s"></div>
+            <div class="pc-top" style="background:#8BA888;width:42px"></div>
+            <div class="pc-body" style="background:linear-gradient(135deg,#8BA888,#6B8870);width:42px;height:108px"></div>
+          </div>
+          <div class="product-overlay">
+            <button class="btn-overlay" data-name="Forêt Boréale" data-price="28">Ajouter au panier</button>
+          </div>
+        </div>
+        <div class="product-info">
+          <p class="product-name">Forêt Boréale</p>
+          <p class="product-sub">Pin & cèdre · 35h · 150g</p>
+          <div class="product-footer">
+            <p class="product-price">28,00 €</p>
+            <button class="wishlist-icon" aria-label="Ajouter aux favoris" data-name="Forêt Boréale">♡</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="product-card" data-cat="frais" data-name="Thé Vert & Bambou" data-price="30" data-stock="6" data-animate>
+        <div class="product-img" style="background:linear-gradient(145deg,#1E2826,#141E1C)">
+          <span class="badge badge-new">Nouveau</span>
+          <div class="product-candle">
+            <div class="pc-flame" style="animation-delay:1.2s"></div>
+            <div class="pc-top" style="background:#A8C8B8;width:44px"></div>
+            <div class="pc-body" style="background:linear-gradient(135deg,#A8C8B8,#7EA898);width:44px;height:115px"></div>
+          </div>
+          <div class="product-overlay">
+            <button class="btn-overlay" data-name="Thé Vert & Bambou" data-price="30">Ajouter au panier</button>
+          </div>
+        </div>
+        <div class="product-info">
+          <p class="product-name">Thé Vert & Bambou</p>
+          <p class="product-sub">Frais & zen · 40h · 180g</p>
+          <div class="product-footer">
+            <p class="product-price">30,00 €</p>
+            <button class="wishlist-icon" aria-label="Ajouter aux favoris" data-name="Thé Vert & Bambou">♡</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="product-card" data-cat="floral" data-name="Rose de Damas" data-price="38" data-stock="4" data-animate>
+        <div class="product-img" style="background:linear-gradient(145deg,#2E1E22,#1E1418)">
+          <div class="product-candle">
+            <div class="pc-flame" style="animation-delay:.6s"></div>
+            <div class="pc-top" style="background:#D8A8B8;width:52px"></div>
+            <div class="pc-body" style="background:linear-gradient(135deg,#D8A8B8,#B88898);width:52px;height:135px"></div>
+          </div>
+          <div class="product-overlay">
+            <button class="btn-overlay" data-name="Rose de Damas" data-price="38">Ajouter au panier</button>
+          </div>
+        </div>
+        <div class="product-info">
+          <p class="product-name">Rose de Damas</p>
+          <p class="product-sub">Floral intense · 50h · 240g</p>
+          <div class="product-footer">
+            <p class="product-price">38,00 €</p>
+            <button class="wishlist-icon" aria-label="Ajouter aux favoris" data-name="Rose de Damas">♡</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="product-card" data-cat="frais" data-name="Mer du Nord" data-price="32" data-stock="7" data-animate>
+        <div class="product-img" style="background:linear-gradient(145deg,#1A2230,#101620)">
+          <div class="product-candle">
+            <div class="pc-flame" style="animation-delay:1s"></div>
+            <div class="pc-top" style="background:#8898C8;width:46px"></div>
+            <div class="pc-body" style="background:linear-gradient(135deg,#8898C8,#6878A8);width:46px;height:118px"></div>
+          </div>
+          <div class="product-overlay">
+            <button class="btn-overlay" data-name="Mer du Nord" data-price="32">Ajouter au panier</button>
+          </div>
+        </div>
+        <div class="product-info">
+          <p class="product-name">Mer du Nord</p>
+          <p class="product-sub">Marin & iodé · 40h · 190g</p>
+          <div class="product-footer">
+            <p class="product-price">32,00 €</p>
+            <button class="wishlist-icon" aria-label="Ajouter aux favoris" data-name="Mer du Nord">♡</button>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- WHY US -->
+  <section class="section why-section" id="pourquoi">
+    <div class="why-intro">
+      <span class="section-label light">Pourquoi CKA</span>
+      <h2 class="section-title light">L'excellence à chaque détail</h2>
+    </div>
+    <div class="why-grid">
+      <div class="why-item" data-animate>
+        <div class="why-num">01</div>
+        <h3 class="why-title">Cire végétale pure</h3>
+        <p class="why-desc">100% cire de soja ou coco, sans paraffine ni additifs chimiques. Une combustion plus propre, plus longue.</p>
+      </div>
+      <div class="why-item" data-animate>
+        <div class="why-num">02</div>
+        <h3 class="why-title">Parfums naturels</h3>
+        <p class="why-desc">Huiles essentielles et absolues sélectionnées auprès des meilleurs producteurs européens.</p>
+      </div>
+      <div class="why-item" data-animate>
+        <div class="why-num">03</div>
+        <h3 class="why-title">Fabriqué en France</h3>
+        <p class="why-desc">Chaque bougie est coulée et assemblée à la main.</p>
+      </div>
+      <div class="why-item" data-animate>
+        <div class="why-num">04</div>
+        <h3 class="why-title">Éco-responsable</h3>
+        <p class="why-desc">Contenants en verre réutilisable, emballages 100% recyclés, expéditions neutralisées en carbone.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- COLLECTIONS -->
+  <section class="section" id="collections">
+    <span class="section-label">Univers olfactifs</span>
+    <h2 class="section-title">Nos collections</h2>
+    <div class="coll-grid">
+      <div class="coll-card coll-large" style="background:linear-gradient(160deg,#2A2318,#1A1510)" data-animate>
+        <div class="coll-content">
+          <span class="coll-label">Collection</span>
+          <p class="coll-name">Nuit Orientale</p>
+          <a href="#nouveautes" class="coll-link">Explorer →</a>
+        </div>
+      </div>
+      <div class="coll-stack">
+        <div class="coll-card" style="background:linear-gradient(160deg,#3D2B1F,#2A1E15)" data-animate>
+          <div class="coll-content">
+            <span class="coll-label">Collection</span>
+            <p class="coll-name">Botanica</p>
+            <a href="#nouveautes" class="coll-link">Explorer →</a>
+          </div>
+        </div>
+        <div class="coll-card" style="background:linear-gradient(160deg,#1F2A2A,#151D1D)" data-animate>
+          <div class="coll-content">
+            <span class="coll-label">Collection</span>
+            <p class="coll-name">Bains de Mer</p>
+            <a href="#nouveautes" class="coll-link">Explorer →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="section testimonials-section">
+    <span class="section-label">Ils nous font confiance</span>
+    <h2 class="section-title">Avis clients</h2>
+    <div class="testimonials-slider" id="testi-slider">
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <p class="testi-text">« Une qualité absolument remarquable. L'Ambre & Bois de Oud dure une éternité et le parfum est envoûtant. Je recommande les yeux fermés. »</p>
+        <p class="testi-author">— Camille D., Paris</p>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <p class="testi-text">« Emballage superbe, bougie encore plus belle. Le Jasmin de Grasse a parfumé tout mon salon pendant des semaines. Un vrai luxe accessible. »</p>
+        <p class="testi-author">— Hugo M., Lyon</p>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <p class="testi-text">« J'ai offert la Forêt Boréale à ma mère pour son anniversaire. Elle m'a dit que c'était l'un des plus beaux cadeaux qu'elle ait jamais reçus. »</p>
+        <p class="testi-author">— Sarah L., Bordeaux</p>
+      </div>
+    </div>
+    <div class="testi-dots" id="testi-dots">
+      <button class="dot active" data-idx="0"></button>
+      <button class="dot" data-idx="1"></button>
+      <button class="dot" data-idx="2"></button>
+    </div>
+  </section>
+
+  <!-- NEWSLETTER -->
+  <section class="newsletter-section" id="newsletter">
+    <div class="nl-wrap">
+      <span class="section-label light">Restez dans la lumière</span>
+      <h2 class="nl-title">–10% sur votre<br>première commande</h2>
+      <p class="nl-sub">Inscrivez-vous et recevez nos dernières créations, inspirations et offres exclusives en avant-première.</p>
+      <form class="nl-form" id="nl-form" novalidate>
+        <input type="email" id="nl-email" class="nl-input" placeholder="votre@email.com" required />
+        <button type="submit" class="btn-primary">S'inscrire</button>
+      </form>
+      <p id="nl-msg" class="nl-msg hidden"></p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="logo-link">
+          <svg width="90" height="50" viewBox="0 0 680 380" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="340" cy="190" r="148" fill="none" stroke="#B8965A" stroke-width="0.6" opacity="0.5"/>
+            <circle cx="340" cy="190" r="130" fill="none" stroke="#B8965A" stroke-width="0.3" opacity="0.3"/>
+            <line x1="95" y1="190" x2="170" y2="190" stroke="#B8965A" stroke-width="0.6" opacity="0.6"/>
+            <rect x="166" y="186" width="8" height="8" fill="none" stroke="#B8965A" stroke-width="0.6" opacity="0.7" transform="rotate(45 170 190)"/>
+            <line x1="510" y1="190" x2="585" y2="190" stroke="#B8965A" stroke-width="0.6" opacity="0.6"/>
+            <rect x="506" y="186" width="8" height="8" fill="none" stroke="#B8965A" stroke-width="0.6" opacity="0.7" transform="rotate(45 510 190)"/>
+            <path d="M340 82 C340 82 332 94 332 103 C332 112 335.5 118 340 118 C344.5 118 348 112 348 103 C348 94 340 82 340 82Z" fill="none" stroke="#B8965A" stroke-width="0.8" opacity="0.7"/>
+            <path d="M340 92 C340 92 336 100 336 105 C336 110 338 114 340 114 C342 114 344 110 344 105 C344 100 340 92 340 92Z" fill="#B8965A" opacity="0.25"/>
+            <line x1="322" y1="126" x2="330" y2="126" stroke="#B8965A" stroke-width="0.6" opacity="0.5"/>
+            <line x1="336" y1="126" x2="344" y2="126" stroke="#B8965A" stroke-width="0.6" opacity="0.5"/>
+            <line x1="350" y1="126" x2="358" y2="126" stroke="#B8965A" stroke-width="0.6" opacity="0.5"/>
+            <text x="340" y="208" text-anchor="middle" dominant-baseline="middle" font-family="'Cormorant Garamond', Georgia, serif" font-size="90" font-weight="300" letter-spacing="18" fill="#B8965A" dx="-3">CKA</text>
+            <line x1="258" y1="242" x2="422" y2="242" stroke="#B8965A" stroke-width="0.5" opacity="0.6"/>
+            <line x1="322" y1="252" x2="330" y2="252" stroke="#B8965A" stroke-width="0.6" opacity="0.5"/>
+            <line x1="336" y1="252" x2="344" y2="252" stroke="#B8965A" stroke-width="0.6" opacity="0.5"/>
+            <line x1="350" y1="252" x2="358" y2="252" stroke="#B8965A" stroke-width="0.6" opacity="0.5"/>
+          </svg>
+        </a>
+        <p class="footer-tagline">L'art de la bougie artisanale française.</p>
+        <div class="socials">
+          <a href="#" aria-label="Instagram" class="social-link">IG</a>
+          <a href="#" aria-label="Pinterest" class="social-link">PT</a>
+          <a href="#" aria-label="TikTok" class="social-link">TK</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Boutique</h4>
+        <ul>
+          <li><a href="#">Nouveautés</a></li>
+          <li><a href="#">Bestsellers</a></li>
+          <li><a href="#">Collections</a></li>
+          <li><a href="#">Sur-mesure</a></li>
+          <li><a href="#">Coffrets cadeaux</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Infos</h4>
+        <ul>
+          <li><a href="#">Notre histoire</a></li>
+          <li><a href="#">Atelier</a></li>
+          <li><a href="#">Ingrédients</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Presse</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Aide</h4>
+        <ul>
+          <li><a href="#">Livraison</a></li>
+          <li><a href="#">Retours</a></li>
+          <li><a href="#">FAQ</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Mentions légales</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 CKA – Tous droits réservés</p>
+      <p>Paiement sécurisé · Livraison 48h · Retours 30 jours</p>
+    </div>
+  </footer>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast" aria-live="polite"></div>
+  <script src="https://www.paypal.com/sdk/js?client-id=ARztNffYabg5w81XMc09LIDNkqTEXvU9Y80eMaxhl8ePpr8zwAjLp7Tf4--FXhlUmu1iejkA-ChsCvr1&currency=EUR"></script>
+  <script src="script.js"></script>
+</body>
+</html>
